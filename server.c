@@ -17,6 +17,21 @@
 #define max_groups 10
 #define mcig 3
 
+void append(char* s, int n) {
+        int len = strlen(s);
+        if(n!=10){
+            s[len] = n + '0';
+            s[len+1] = ' ';
+            s[len+2] = '\0';
+        }
+        else{
+            s[len] = '1';
+            s[len+1] = '0';
+            s[len+2] = ' ';
+            s[len+2] = '\0';
+        }
+}
+
 int main(int argc, char* argv[]){
     if(argc < 2 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0){
         printf("Usage: %s <port>\n", argv[0]);
@@ -150,6 +165,22 @@ int main(int argc, char* argv[]){
                 else{
                     char msg[] = "Room you requested to join is full.\n";
                     send(new_clinet_fd, msg, strlen(msg), 0);
+                    int count_empty_rooms = 0;
+                    char msg2[512] = "Following rooms are available: \n";
+                    for(int i=0; i<max_groups; i++){
+                        if(count_clients[i] < 3){
+                            count_empty_rooms++;
+                            append(msg2, i+1);
+                        }
+                    }
+                    if(count_empty_rooms == 0){
+                        char msg3[512] = "All the rooms are currently full. Try to join after sometime.\n";
+                        send(new_clinet_fd, msg3, strlen(msg3), 0);
+                    }
+                    else{
+                        strcat(msg2, "\n");
+                        send(new_clinet_fd, msg2, strlen(msg2), 0);
+                    }
                     shutdown(new_clinet_fd, 2);
                 }
             }
